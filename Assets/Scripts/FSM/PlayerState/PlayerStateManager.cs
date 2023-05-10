@@ -10,7 +10,6 @@ public class PlayerStateManager : MonoBehaviour
     StateFactory _states;
     WeaponIK weaponIK;
     WeaponModel weaponModel;
-    Door door;
     RaycastHit attackHit;
 
     //getter setter
@@ -78,7 +77,7 @@ public class PlayerStateManager : MonoBehaviour
     private bool _isMovementPress;
     private bool _isNeedToResetJump = false;
     private bool _isRunPress = false;
-    private bool _isHasWeapon = true;
+    private bool _isHasWeapon = false;
     private bool _isAlive = true;
     private bool _isCrouching = false;
     private bool _isAttacking = false;
@@ -110,7 +109,6 @@ public class PlayerStateManager : MonoBehaviour
     public bool IsAttacking { get { return _isAttacking; } set { _isAttacking = value; } }
     public bool CantShoot { get {return _cantShoot; } set { _cantShoot = value; } }
     public bool IsStoryTeling { get { return _isStoryteling; } set { _isStoryteling = value; } }
-    public Door SetDoor { set { door = value; } }
     public float Health { get { return health; } set { health = value; } }
     public GameObject BloodImpactEffectPerfab { get { return bloodImpactEffectPerfab; } }
     public bool IsAlive { get { return _isAlive; }}
@@ -152,7 +150,6 @@ public class PlayerStateManager : MonoBehaviour
     private void Start()
     {
         _ani.SetBool(HasRifle, _isHasWeapon);
-        UIManager.Ins.mainGameUI.gameObject.SetActive(true);
     }
 
     private void Update()
@@ -170,7 +167,6 @@ public class PlayerStateManager : MonoBehaviour
         GroundCheck();
         //Input
         GetInput();
-        CamController();
         SetSpeedAniParametter();
     }
 
@@ -240,17 +236,11 @@ public class PlayerStateManager : MonoBehaviour
             }
         }
 
-        if(Input.GetKeyDown(KeyCode.E) && door != null)
-        {
-            if (door._isTurning) return;
-            StartCoroutine(door.OpenDoor());
-        }
     }
 
     IEnumerator delayGiveDamage()
     {
         yield return new WaitForSeconds(.35f);
-        attackHit.transform.GetComponent<EnemyStateManager>().TakeDamage(20f);
     }
 
     void SetSpeedAniParametter()
@@ -261,7 +251,6 @@ public class PlayerStateManager : MonoBehaviour
 
     public void SetRemapSpeedAniParemetter()
     {
-
         Vector3 localMove = transform.InverseTransformDirection(moveVectorDir);
 
         // Z asix is forward
@@ -270,23 +259,7 @@ public class PlayerStateManager : MonoBehaviour
         _ani.SetFloat(remapYSpeed, localMove.z);
     }
 
-    private void CamController()
-    {
-        if (!_isHasWeapon || _ani.GetBool(Crouching))
-            return;
-
-        Ray cameraRay = _cam.ScreenPointToRay(Input.mousePosition);
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero); ;
-
-        float rayLength;
-
-        if(groundPlane.Raycast(cameraRay, out rayLength) && _isGrounded)
-        {
-            Vector3 pointToLook = cameraRay.GetPoint(rayLength);
-
-            transform.LookAt(new Vector3(pointToLook.x, transform.position.y, pointToLook.z));
-        }
-    }
+    
 
     public void TakeHit(float Damage)
     {

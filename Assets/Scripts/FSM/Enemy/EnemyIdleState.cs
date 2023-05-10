@@ -20,11 +20,5 @@ public class EnemyIdleState : EnemyBaseState
 
     public override void CheckSwitchState()
     {
-        if (Ctx.IsMovement && !Ctx.FoundPlayer)
-            SwitchState(Factory.Walk());
-        else if(Ctx.IsMovement && Ctx.FoundPlayer)
-            SwitchState(Factory.Run());
-        if(Ctx.CanAttack)
-            SwitchState(Factory.Attack());
     }
 }
